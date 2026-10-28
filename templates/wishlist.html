@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <h1 style="text-align:center">Wishlist</h1>
+    {% if wishlist_items %}
+    <div class="row">
+      {% for item in wishlist_items %}
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-2">
+        <div class="wishlist-game">
+          <div class="game-card">
+            <button
+              type="button"
+              class="btn btn-primary wishlist-config-btn"
+              data-toggle="modal"
+              data-target="#wishlistConfig{{ item.rel_game.id }}"
+            >
+              <i class="fas fa-cog"></i>
+            </button>
+            <div
+              class="modal fade"
+              id="wishlistConfig{{ item.rel_game.id }}"
+              tabindex="-1"
+              role="dialog"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <form
+                    method="POST"
+                    action="{{ url_for(
+                      'game.configure_wishlist',
+                      slug=item.rel_game.slug
+                    ) }}"
+                  >
+                    <div class="modal-header">
+                      <h5 class="modal-title">
+                        Configurar Wishlist
+                      </h5>
+                      <button
+                        type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Cerrar"
+                      >
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <p>
+                        <b>{{ item.rel_game.title }}</b>
+                      </p>
+                      <div class="form-group">
+                        <label for="targetPrice{{ item.rel_game.id }}">
+                          Precio deseado
+                        </label>
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="targetPrice{{ item.rel_game.id }}"
+                          name="target_price"
+                          min="0"
+                          step="1"
+                          value="{{ (item.target_price_cents / 100) if item.target_price_cents is not none else '' }}"
+                          placeholder="Ej: 5000"
+                        >
+                      </div>
+                      <div class="form-check">
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          id="notify{{ item.rel_game.id }}"
+                          name="notify"
+                          {% if item.notify %}checked{% endif %}
+                        >
+                        <label
+                          class="form-check-label"
+                          for="notify{{ item.rel_game.id }}"
+                        >
+                          Avisarme cuando llegue a este precio
+                        </label>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                      >
+                        Guardar
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <a
+              href="{{ url_for('game.game_details', slug=item.rel_game.slug) }}"
+              class="game-link"
+            >
+              <div
+                class="btn btn-primary btn-block btn-transparent"
+                style="--cover: url('{{ item.rel_game.image_url }}');"
+              >
+                <b>{{ item.rel_game.title }}</b>
+              </div>
+            </a>
+            <form
+              method="POST"
+              action="{{ url_for('game.toggle_wishlist', slug=item.rel_game.slug) }}"
+              class="wishlist-remove"
+            >
+              <button
+                type="submit"
+                class="btn btn-primary btn-block"
+              >
+                <i class="fas fa-trash"></i>
+                Quitar de Wishlist
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center mt-5">
+      <i class="far fa-star fa-3x mb-3"></i>
+      <h3>Tu Wishlist está vacía</h3>
+      <p>
+        Agregá juegos desde su página de detalles
+        para encontrarlos fácilmente acá.
+      </p>
+      <a
+        href="{{ url_for('game.game_list') }}"
+        class="btn btn-primary"
+      >
+        <i class="fas fa-gamepad"></i>
+        Ver juegos
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="{{ url_for('index') }}" class="btn btn-primary ml-3">← Volver</a>
+<h2 style="font-weight:bold; text-align:center;">{{ game.title }}</h2>
+{% if current_user %}
+<form method="POST" action="{{ url_for('game.toggle_wishlist', slug=game.slug) }}" style="text-align:center;">
+  {% if in_wishlist %}
+  <button type="submit" class="btn btn-primary">
+    <i class="fas fa-trash"></i>
+    Quitar de Wishlist
+  </button>
+  {% else %}
+  <button type="submit" class="btn btn-primary">
+    <i class="far fa-star"></i>
+    Agregar a Wishlist
+  </button>
+  {% endif %}
+</form>
+{% else %}
+<div class="centered">
+  <a href="{{ url_for('auth.auth', tab='login') }}" class="btn btn-primary">
+    <i class="far fa-star"></i>
+    Iniciá sesión para agregar a Wishlist
+  </a>
+</div>
+{% endif %}
+<h4 class="mt-0" style="padding-left:5%;">Precios</h4>
+<div class="d-none d-md-block mt-2">
+  <table class="table table-oferjuegos">
+    <thead>
+      <tr><th>Tienda</th><th>Precio original</th><th>Precio Convertido</th><th>Precio Final</th><th>Link</th></tr>
+    </thead>
+    <tbody>
+      {% for oferta in ofertas %}
+      <tr>
+        <td style="text-align:left;"><a href=" {{ oferta.store_url }} ">{{ oferta.store_name }}</a></td>
+<td>
+    {{ oferta.moneda }} ${{ "%.2f"|format(oferta.precio_original) }}
+    {% if oferta.descuento > 0 %}
+        <span class="badge badge-secondary ml-1">-{{ oferta.descuento }}%</span>
+    {% endif %}
+</td>        <td>${{ "%.2f"|format(oferta.precio_convertido) }}</td>
+        <td><b>${{ "%.2f"|format(oferta.precio_final) }}</b></td>
+        <td>
+          <a href="{{ oferta.url_juego }}">
+            <div class="btn-secondary">
+              <b><u>Ver oferta</u></b>
+            </div>
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% for oferta in ofertas %}
+<div class="card bg-primary p-2 d-block d-md-none">
+  <div class="card-header">
+    <h4><a href=" {{ oferta.store_url }} ">{{ oferta.store_name }}</a></h4>
+  </div>
+  <div class="card-body">
+    <div>
+<h6>
+    Precio Original:
+    <div class="float-right">
+        {{ oferta.moneda }} ${{ "%.2f"|format(oferta.precio_original) }}
+        {% if oferta.descuento > 0 %}
+            <span class="badge badge-secondary ml-1">-{{ oferta.descuento }}%</span>
+        {% endif %}
+    </div>
+</h6>
+      <h5>Convertido: <div class="float-right">${{ "%.2f"|format(oferta.precio_convertido) }}</div></h5>
+      <h3>Final: <div class="float-right"><b>${{ "%.2f"|format(oferta.precio_final) }}</b></div></h3>
+    </div>
+  </div>
+  <a href="{{ oferta.url_juego }}">
+    <div class="card-footer interactive-footer">
+      <h5 style="text-align:center">Ver oferta</h5>
+    </div>
+  </a>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-center align-items-center">
+  <section class="content w-100">
+    <div class="container-fluid" style="max-width: 500px;">
+      <ul class="nav nav-tabs mb-3" id="authTabs">
+        <li class="nav-item">
+          <a class="nav-link {% if tab == 'login' %}active{% endif %}" href="?tab=login">Iniciar Sesión</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if tab == 'register' %}active{% endif %}" href="?tab=register">Registrarse</a>
+        </li>
+		<li class="nav-item ml-auto">
+  <a class="nav-link {% if tab == 'delete' %}active{% endif %}" href="?tab=delete">Eliminar cuenta</a>
+</li>
+      </ul>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+      {% endif %}
+      {% endwith %}
+      {% if tab == "login" %}
+      <form method="POST" autocomplete="off">
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" name="login" class="btn btn-primary w-100">Ingresar</button>
+      </form>
+      {% endif %}
+      {% if tab == "register" %}
+      <form method="POST" autocomplete="off">
+        <div class="mb-3">
+          <label for="username" class="form-label">Nombre</label>
+          <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Correo</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3">
+          <label for="password_confirm" class="form-label">Confirmar contraseña</label>
+          <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+        </div>
+        <button type="submit" name="register" class="btn btn-primary w-100">Registrarse</button>
+      </form>
+      {% endif %}
+	  {% if tab == "delete" %}
+<form method="POST" autocomplete="off" onsubmit="return confirm('¿Estás seguro de que querés eliminar tu cuenta? Esta acción no se puede deshacer.');">
+  <div class="mb-3">
+    <label for="delete_email" class="form-label">Correo</label>
+    <input type="email" class="form-control" id="delete_email" name="delete_email" required>
+  </div>
+  <div class="mb-3">
+    <label for="delete_password" class="form-label">Contraseña</label>
+    <input type="password" class="form-control" id="delete_password" name="delete_password" required>
+  </div>
+  <div class="mb-3">
+    <label for="delete_password_confirm" class="form-label">Confirmar contraseña</label>
+    <input type="password" class="form-control" id="delete_password_confirm" name="delete_password_confirm" required>
+  </div>
+  <button type="submit" name="delete_account" class="btn btn-danger w-100">Eliminar mi cuenta</button>
+</form>
+{% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

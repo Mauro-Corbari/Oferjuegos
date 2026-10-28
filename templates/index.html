@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <h1>Juegos</h1>
+
+    <form method="GET" action="{{ url_for('game.game_list') }}" class="form">
+      {% if search_query %}
+      <input type="hidden" name="q" value="{{ search_query }}">
+      {% endif %}
+
+      <input
+        type="hidden"
+        name="min_price"
+        value="{{ request.args.get('min_price', '') }}"
+      >
+
+      <input
+        type="hidden"
+        name="max_price"
+        value="{{ request.args.get('max_price', '') }}"
+      >
+
+      <label for="genero_id" class="mr-2">Género:</label>
+
+      <div class="price-slider-container">
+        <select
+          name="genero_id"
+          id="genero_id"
+          class="form-control custom-select-genre"
+          onchange="this.form.submit()"
+          style="color: #333333; background-color: #ffffff;"
+        >
+          <option value="" style="color: #333333;">
+            -- Todos los géneros --
+          </option>
+
+          {% for g in generos %}
+          <option
+            value="{{ g.id }}"
+            {% if genero_seleccionado == g.id %}selected{% endif %}
+            style="color: #333333;"
+          >
+            {{ g.genre }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <a
+        href="{{ url_for('game.game_list') }}"
+        class="btn btn-secondary mt-2"
+      >
+        Limpiar filtros
+      </a>
+    </form>
+
+    <form method="GET" action="{{ url_for('game.game_list') }}" class="form">
+      <input
+        type="hidden"
+        name="q"
+        value="{{ search_query }}"
+      >
+
+      <input
+        type="hidden"
+        name="genero_id"
+        value="{{ genero_seleccionado or '' }}"
+      >
+
+      <label for="minPriceSlider">
+        Precio:
+      </label>
+
+      <div class="price-slider-container">
+        <div class="price-slider">
+          <div class="price-slider-track"></div>
+
+          <div
+            class="price-slider-range"
+            id="priceSliderRange"
+          ></div>
+
+          <input
+            type="range"
+            id="minPriceSlider"
+            name="min_price"
+            min="0"
+            max="{{ slider_max_price }}"
+            value="{{ request.args.get('min_price', 0) }}"
+            step="100"
+          >
+
+          <input
+            type="range"
+            id="maxPriceSlider"
+            name="max_price"
+            min="0"
+            max="{{ slider_max_price }}"
+            value="{{ selected_max_price if selected_max_price is not none else max_price }}"
+            step="100"
+          >
+        </div>
+      </div>
+
+      <div class="price-values">
+        <span id="minPriceValue">
+          ${{ "%.2f"|format(request.args.get('min_price', 0)) }}
+        </span>
+
+        <span> - </span>
+
+        <span id="maxPriceValue">
+          ${{ "%.2f"|format(selected_max_price if selected_max_price is not none else max_price) }}
+        </span>
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+      >
+        <i class="fas fa-filter"></i>
+        Filtrar
+      </button>
+    </form>
+
+    <div class="row mb-3 mt-2">
+      <div class="col-12 col-md-6 mb-2 mb-md-0">
+        <a href="{{ url_for(
+          'game.game_list',
+          q=search_query,
+          genero_id=genero_seleccionado,
+          min_price=request.args.get('min_price'),
+          max_price=request.args.get('max_price'),
+          discount=1
+        ) }}">
+          <div class="btn btn-secondary btn-special">
+            <b>Juegos con descuentos</b>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <a href="{{ url_for(
+          'game.game_list',
+          q=search_query,
+          genero_id=genero_seleccionado,
+          min_price=request.args.get('min_price'),
+          max_price=request.args.get('max_price'),
+          discount=100
+        ) }}">
+          <div class="btn btn-primary btn-special btn-100">
+            <b>Juegos temporalmente gratis</b>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="row">
+      {% for game in games %}
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-1">
+        <a href="{{ url_for('game.game_details', slug=game.slug) }}">
+          <div
+            class="btn btn-primary btn-block btn-transparent"
+            style="--cover: url('{{ game.image }}');"
+          >
+            {% if game.discount > 0 %}
+            <div class="discount-ribbon {% if game.discount == 100 %}free-ribbon{% endif %}">
+              -{{ game.discount }}%
+            </div>
+            {% endif %}
+
+            <b>{{ game.title }}</b>
+
+            <div class="precio">
+              Desde ${{ "%.2f"|format(game.price) }}
+            </div>
+          </div>
+        </a>
+      </div>
+      {% else %}
+      <div class="col-12">
+        <p>No se encontraron juegos para el género o búsqueda seleccionados.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-center mt-4 mb-4">
+      {% if total_pages > 1 %}
+      <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center">
+          {% if current_page > 1 %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="{{ url_for(
+                'game.game_list',
+                page=current_page - 1,
+                q=search_query,
+                genero_id=genero_seleccionado,
+                min_price=request.args.get('min_price'),
+                max_price=request.args.get('max_price')
+              ) }}"
+            >
+              Anterior
+            </a>
+          </li>
+          {% endif %}
+
+          {% for pagina in range(1, total_pages + 1) %}
+          <li class="page-item {% if pagina == current_page %}active{% endif %}">
+            <a
+              class="page-link"
+              href="{{ url_for(
+                'game.game_list',
+                page=pagina,
+                q=search_query,
+                genero_id=genero_seleccionado,
+                min_price=request.args.get('min_price'),
+                max_price=request.args.get('max_price')
+              ) }}"
+            >
+              {{ pagina }}
+            </a>
+          </li>
+          {% endfor %}
+
+          {% if current_page < total_pages %}
+          <li class="page-item">
+            <a
+              class="page-link"
+              href="{{ url_for(
+                'game.game_list',
+                page=current_page + 1,
+                q=search_query,
+                genero_id=genero_seleccionado,
+                min_price=request.args.get('min_price'),
+                max_price=request.args.get('max_price')
+              ) }}"
+            >
+              Siguiente
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<script>
+  const minSlider = document.getElementById("minPriceSlider");
+  const maxSlider = document.getElementById("maxPriceSlider");
+
+  const minValue = document.getElementById("minPriceValue");
+  const maxValue = document.getElementById("maxPriceValue");
+
+  minSlider.addEventListener("input", function () {
+    minValue.textContent = "$" + this.value;
+  });
+
+  maxSlider.addEventListener("input", function () {
+    maxValue.textContent = "$" + this.value;
+  });
+</script>
+{% endblock %}

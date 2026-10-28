@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="content">
+  <div class="container-fluid">
+    <h1 class="text-center mb-4">Tiendas</h1>
+    <div class="row">
+      {% for store in stores %}
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-3 mb-1">
+        <div class="card bg-secondary ">
+          <div class="card-body ">
+            <h4 class="card-title">
+              {{ store.name }}
+            </h4>
+            <p class="card-text">
+              Moneda: {{ store.currency }}
+            </p>
+            <p class="card-text">
+              Impuesto: {{ store.tax }}%
+            </p>
+            {% if store.id in hidden_stores %}
+            <span class="badge badge-secondary mb-2">
+              Oculto
+            </span>
+            <form
+              action="{{ url_for('store.unhide_store', store_id=store.id) }}"
+              method="POST"
+            >
+              <button type="submit" class="btn btn-invisible w-100">
+                <i class="fas fa-eye"></i>
+                Mostrar tienda
+              </button>
+            </form>
+            {% else %}
+            <span class="badge badge-primary mb-2">
+              Visible
+            </span>
+            <form
+              action="{{ url_for('store.hide_store', store_id=store.id) }}"
+              method="POST"
+            >
+              <button type="submit" class="btn btn-invisible w-100">
+                <i class="fas fa-eye-slash"></i>
+                Ocultar tienda
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
